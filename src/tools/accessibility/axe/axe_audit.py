@@ -46,15 +46,15 @@ def get_active_url():
         
         if frontApp is "Google Chrome" then
             tell application "Google Chrome"
-                return URL of active tab of front window
+                get URL of active tab of front window
             end tell
         else if frontApp is "Safari" then
             tell application "Safari"
-                return URL of current tab of front window
+                get URL of current tab of front window
             end tell
         else if frontApp is "Firefox" then
             tell application "Firefox"
-                return URL of active tab of front window
+                get URL of active tab of front window
             end tell
         end if
         '''
