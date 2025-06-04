@@ -1,7 +1,7 @@
 # Lighthouse Accessibility Audit Tool
 
 ## Overview
-A Stream Deck-optimized tool that runs Lighthouse audits on web pages using the official Lighthouse CLI. It can take a URL from the active browser window, command line, or clipboard, making it perfect for quick accessibility checks while browsing.
+A Stream Deck-optimized tool that runs Lighthouse audits on web pages using the official Lighthouse CLI. It can take a URL from the active browser window, command line, or clipboard, making it perfect for quick accessibility checks while browsing. The tool provides visual feedback through Stream Deck and maintains detailed logs for troubleshooting.
 
 ## Requirements
 - Python 3.8 or higher
@@ -38,27 +38,29 @@ A Stream Deck-optimized tool that runs Lighthouse audits on web pages using the 
 
 ## Stream Deck Setup
 
-### Production Mode (Silent Operation)
-1. Install the "System: Open" action or a Python script launcher plugin
+### Basic Setup
+1. Install the "System: Open" action
 2. Configure the button:
    - Set the script path to the `lighthouse_audit.py` script
-   - (Optional) Add an icon representing accessibility testing
+   - Set up success/fail states:
+     - Success: When script outputs "success"
+     - Fail: When script outputs "fail"
+   - (Optional) Add icons for success/fail states
    - (Optional) Add a title like "Audit Page"
 
-### Debug Mode (With Terminal Output)
-For testing and troubleshooting, use one of the debug launcher scripts:
+### Status Returns
+The script will return one of two values:
+- `success`: Audit completed successfully
+- `fail`: Audit failed (check logs for details)
 
-#### Windows
-1. Create a new Stream Deck button
-2. Choose "System: Open" action
-3. Set the path to `debug_launcher.bat`
-4. The script will open a command prompt window showing the progress
-
-#### macOS and Linux
-1. Create a new Stream Deck button
-2. Choose "System: Open" action
-3. Set the path to `debug_launcher.sh`
-4. The script will open a terminal window showing the progress
+### Logging
+- All actions are logged to: `~/lighthouse_reports/logs/`
+- Log filename format: `lighthouse_audit_YYYYMMDD_HHMMSS.log`
+- Logs include:
+  - URL detection attempts
+  - Command execution details
+  - Error messages
+  - Success/failure status
 
 ## Usage
 ### Basic Usage
@@ -67,27 +69,15 @@ For testing and troubleshooting, use one of the debug launcher scripts:
 3. The script will:
    1. Try to get the URL from the active browser window
    2. If that fails, try to get it from your clipboard
-   3. If both fail, show an error message
+   3. If both fail, show an error and return "fail"
 4. Wait for the audit to complete
-5. The report will automatically open in your default browser
+5. The report will automatically open in your browser
+6. Stream Deck button will show success/fail state
 
 ### Command Line Usage
 ```bash
-# Normal mode (silent operation)
 python lighthouse_audit.py [URL]
-
-# Debug mode (with detailed output)
-python lighthouse_audit.py -d [URL]
 ```
-
-### Debug Mode Features
-When running in debug mode (-d flag), the script will:
-1. Open in a terminal window
-2. Show detailed progress information
-3. Display the exact commands being run
-4. Show any error messages or output
-5. Wait for user input before closing
-6. Keep the terminal window open for inspection
 
 ### Configuration
 The tool can be configured through environment variables in a `.env` file:
@@ -100,7 +90,10 @@ LIGHTHOUSE_REPORTS_DIR=/path/to/custom/reports/directory
 
 ### Output
 - Reports are saved in `~/lighthouse_reports/` by default (can be customized via `LIGHTHOUSE_REPORTS_DIR`)
-- Filename format: `lighthouse_domain_YYYYMMDD_HHMMSS.html`
+- Logs are saved in `~/lighthouse_reports/logs/`
+- Filename formats:
+  - Reports: `lighthouse_domain_YYYYMMDD_HHMMSS.html`
+  - Logs: `lighthouse_audit_YYYYMMDD_HHMMSS.log`
 - Reports include scores for:
   - Accessibility
   - Performance
@@ -114,13 +107,15 @@ LIGHTHOUSE_REPORTS_DIR=/path/to/custom/reports/directory
   2. Command line arguments
   3. Clipboard content
 - Cross-platform support (macOS, Windows, Linux)
-- Debug mode with detailed output
-- Headless Chrome operation (no visible browser window)
+- Stream Deck integration:
+  - Visual success/fail feedback
+  - Status-based icons
+- Detailed logging system
+- Headless Chrome operation
 - Comprehensive HTML reports
-- Local report storage for reference
-- Progress indication during audit
-- Error handling with clear messages
-- Customizable reports directory
+- Local report storage
+- Progress indication
+- Error handling with logs
 
 ## Troubleshooting
 Common issues and solutions:
@@ -128,35 +123,35 @@ Common issues and solutions:
 1. **No URL Found**
    - Make sure your browser window is in focus
    - Try copying the URL to your clipboard
-   - Try passing the URL directly as a command line argument
-   - Run in debug mode to see what's happening
+   - Check the logs for URL detection attempts
 
 2. **Chrome Not Found**
    - Ensure Chrome is installed on your system
+   - Check the logs for specific error messages
    - The script uses headless Chrome for auditing
-   - Run in debug mode to see the exact error
 
 3. **Report Not Opening**
    - Check if the report was generated in the configured reports directory
-   - Try opening the report manually from the directory
-   - Run in debug mode to see the full path
+   - Look in the logs for the exact report path
+   - Try opening the report manually
 
 4. **Active Window Detection Not Working**
    - macOS: Make sure your browser is allowed in System Settings > Privacy & Security > Automation
    - Windows: Ensure PowerShell is available
    - Linux: Check if xdotool is installed (`which xdotool`)
-   - Run in debug mode to see which detection method is being used
+   - Check logs for detection method used
 
 5. **Stream Deck Button Not Working**
-   - Try using the debug launcher script instead of the main script
-   - Check the file paths in your Stream Deck button configuration
+   - Check the logs in `~/lighthouse_reports/logs/`
+   - Verify the script path in Stream Deck configuration
    - Make sure Python is in your system PATH
-   - Look for error messages in the debug terminal window
+   - Check if the button shows the fail state
 
 ## Notes
 - Reports are stored locally and can be accessed later
-- The tool uses the official Lighthouse CLI, providing the same results as Chrome DevTools
+- Logs provide detailed information for troubleshooting
+- The tool uses the official Lighthouse CLI
 - For best results, ensure you have a stable internet connection
-- The script runs Chrome in headless mode to avoid visual disruption
+- The script runs Chrome in headless mode
 - Browser window detection works with Chrome, Safari, and Firefox on macOS, and most modern browsers on Windows and Linux
-- Debug mode is perfect for testing and troubleshooting Stream Deck integration 
+- Stream Deck integration provides visual feedback for success/failure 
