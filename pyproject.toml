@@ -19,4 +19,14 @@ classifiers = [
 
 [project.urls]
 "Homepage" = "https://github.com/gromitski/streamlined-dev-tools"
-"Bug Tracker" = "https://github.com/gromitski/streamlined-dev-tools/issues" 
+"Bug Tracker" = "https://github.com/gromitski/streamlined-dev-tools/issues"
+
+[tool.black]
+line-length = 100
+target-version = ['py37']
+include = '\.pyi?$'
+extend-exclude = '''
+# A regex preceded with ^/ will apply only to files and directories
+# in the root of the project.
+^/venv/
+'''
