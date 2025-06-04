@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "streamlined-dev-tools"
+version = "0.1.0"
+authors = [
+    { name="Stu Collett" },
+]
+description = "A collection of development-related Python scripts for Stream Deck integration"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/gromitski/streamlined-dev-tools"
+"Bug Tracker" = "https://github.com/gromitski/streamlined-dev-tools/issues" 
