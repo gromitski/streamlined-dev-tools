@@ -8,6 +8,8 @@ and opens the report in Chrome. Designed for Stream Deck integration.
 
 import os
 import sys
+import time
+import argparse
 import subprocess
 from pathlib import Path
 from datetime import datetime
@@ -43,7 +45,7 @@ def get_url_from_clipboard() -> Optional[str]:
         return None
     return None
 
-def run_lighthouse_audit(url: str) -> Path:
+def run_lighthouse_audit(url: str, debug: bool = False) -> Path:
     """Run Lighthouse audit using the Lighthouse CLI."""
     # Create reports directory if it doesn't exist
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -64,6 +66,9 @@ def run_lighthouse_audit(url: str) -> Path:
         '--only-categories=accessibility,best-practices,performance,pwa,seo',  # Categories to audit
         '--view'  # Automatically open report in browser
     ]
+
+    if debug:
+        console.print(f"[yellow]Running command:[/yellow] {' '.join(cmd)}")
     
     try:
         # Run Lighthouse CLI
@@ -79,6 +84,10 @@ def run_lighthouse_audit(url: str) -> Path:
         
         if process.returncode != 0:
             raise Exception(f"Lighthouse audit failed: {stderr}")
+
+        if debug and stdout:
+            console.print("[yellow]Command output:[/yellow]")
+            console.print(stdout)
         
         return report_path
         
@@ -90,7 +99,7 @@ def run_lighthouse_audit(url: str) -> Path:
 def get_url() -> Optional[str]:
     """Get URL from command line, active browser window, or clipboard."""
     # First, check command line arguments
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 1 and not sys.argv[1].startswith('-'):
         return sys.argv[1]
     
     # Then try to get URL from active browser window
@@ -103,15 +112,29 @@ def get_url() -> Optional[str]:
 
 def main():
     """Main function to run the Lighthouse audit."""
+    parser = argparse.ArgumentParser(description='Run Lighthouse accessibility audit.')
+    parser.add_argument('-d', '--debug', action='store_true', help='Run in debug mode with terminal output')
+    parser.add_argument('url', nargs='?', help='URL to audit (optional)')
+    args = parser.parse_args()
+
     try:
+        if args.debug:
+            console.print("[yellow]Debug mode enabled[/yellow]")
+            console.print("[yellow]Checking for URL...[/yellow]")
+
         # Get URL from available sources
-        url = get_url()
+        url = args.url or get_url()
         if not url:
             console.print("[red]Error: No URL provided, no active browser window found, and no valid URL in clipboard[/red]")
+            if args.debug:
+                console.print("[yellow]Press Enter to exit...[/yellow]")
+                input()
             sys.exit(1)
         
         # Validate URL
         url = validate_url(url)
+        if args.debug:
+            console.print(f"[green]Found URL:[/green] {url}")
         
         with Progress(
             SpinnerColumn(),
@@ -120,12 +143,19 @@ def main():
         ) as progress:
             # Run audit
             progress.add_task(description=f"Running Lighthouse audit for {url}...", total=None)
-            report_path = run_lighthouse_audit(url)
+            report_path = run_lighthouse_audit(url, args.debug)
             
             console.print(f"\n[green]Report generated and opened in browser: {report_path}[/green]")
+
+        if args.debug:
+            console.print("[yellow]Press Enter to exit...[/yellow]")
+            input()
     
     except Exception as e:
         console.print(f"[red]Error: {str(e)}[/red]")
+        if args.debug:
+            console.print("[yellow]Press Enter to exit...[/yellow]")
+            input()
         sys.exit(1)
 
 if __name__ == "__main__":
