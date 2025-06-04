@@ -19,6 +19,7 @@ streamlined-dev-tools/
 ├── tests/
 │   └── tools/         # Tool-specific tests
 ├── examples/          # Example scripts and configurations
+├── scripts/          # Setup and utility scripts
 ├── pyproject.toml     # Project configuration
 └── README.md         # This file
 ```
@@ -33,7 +34,12 @@ The package includes (or will include) various tools for:
 - System Monitoring
 - Custom Utility Scripts
 
-(Individual tools will be listed here as they are developed)
+### Available Tools
+
+#### Accessibility
+- **Lighthouse Audit**: Run accessibility audits on web pages directly from your Stream Deck
+
+(More tools will be listed here as they are developed)
 
 ## Requirements
 
@@ -42,16 +48,46 @@ The package includes (or will include) various tools for:
 
 ## Installation
 
+### For Development
+
 1. Clone the repository:
 ```bash
 git clone https://github.com/gromitski/streamlined-dev-tools.git
 cd streamlined-dev-tools
 ```
 
-2. Install dependencies (once available):
+2. Install dependencies in a virtual environment:
 ```bash
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```
+
+### For Stream Deck Usage
+
+To use the tools directly with Stream Deck buttons (recommended):
+
+1. Clone the repository:
+```bash
+git clone https://github.com/gromitski/streamlined-dev-tools.git
+cd streamlined-dev-tools
+```
+
+2. Run the global setup script:
+```bash
+./scripts/setup_global.sh
+```
+
+This will install all necessary dependencies globally, making the tools ready to use with Stream Deck buttons.
+
+## Stream Deck Setup
+
+1. Create a new button in Stream Deck
+2. Choose 'System: Open' action
+3. Set the path to the script you want to run (e.g., `path/to/streamlined-dev-tools/src/tools/accessibility/lighthouse/lighthouse_audit.py`)
+4. Set 'Open with' to: python3
+
+Each tool's documentation includes specific Stream Deck setup instructions.
 
 ## Usage
 
@@ -59,7 +95,7 @@ Each tool in the package is documented separately. See the `docs/tools/` directo
 
 ### Quick Start
 
-(Quick start guides will be added as tools are developed)
+See individual tool documentation in `docs/tools/` for quick start guides.
 
 ## Documentation
 
