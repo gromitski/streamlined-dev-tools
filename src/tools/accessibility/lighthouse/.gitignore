@@ -1,0 +1,22 @@
+# Python virtual environment
+venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# macOS system files
+.DS_Store
+
+# Environment variables
+.env
+
+# Logs and reports
+logs/
+*.log
+lighthouse_reports/
+
+# IDE settings
+.vscode/
+.idea/ 
