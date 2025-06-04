@@ -12,9 +12,9 @@ This repository contains various utility scripts and tools to enhance developer 
 streamlined-dev-tools/
 ├── src/
 │   └── tools/         # Individual tool implementations
-├── docs/
-│   └── tools/         # Individual tool documentation
-├── tests/             # Tool-specific tests
+│       └── accessibility/
+│           ├── axe/   # Axe Core accessibility audit tool
+│           └── lighthouse/ # Lighthouse audit tool
 └── README.md         # This file
 ```
 
@@ -22,23 +22,32 @@ streamlined-dev-tools/
 
 The package includes tools for:
 
-### Accessibility
-- **Lighthouse Audit**: Run accessibility audits on web pages directly from your Stream Deck
+### Accessibility Testing
+- **Axe Core Audit**: Focused accessibility testing with axe-core
   - Gets URLs from active browser windows or clipboard
-  - Generates comprehensive HTML reports
-  - Shows results through modal dialogs
-  - Handles all dependencies automatically
+  - Generates beautiful HTML reports
+  - Shows results through terminal and browser
+  - Focuses specifically on accessibility issues
+  - Supports macOS, Windows, and Linux
+
+- **Lighthouse Audit**: Comprehensive web page auditing
+  - Analyzes accessibility, performance, SEO, and best practices
+  - Generates detailed HTML reports
+  - Shows results in Chrome
+  - Includes Progressive Web App (PWA) metrics
+  - Perfect for general website health checks
 
 ## Requirements
 
 - Python 3.7 or higher
+- Node.js and npm (for axe-core CLI and Lighthouse)
 - Additional requirements are listed in each tool's documentation
 
 ## Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/gromitski/streamlined-dev-tools.git
+git clone https://github.com/yourusername/streamlined-dev-tools.git
 cd streamlined-dev-tools
 ```
 
@@ -50,22 +59,40 @@ Each tool comes with its own launcher script that handles all dependencies and e
 
 1. Create a new button in Stream Deck
 2. Choose "System: Open" action
-3. Set the path to the tool's launcher script (e.g., `path/to/repo/src/tools/accessibility/lighthouse/run_lighthouse.sh`)
+3. Set the path to the tool's launcher script:
+   - For Axe: `path/to/repo/src/tools/accessibility/axe/run_axe.sh`
+   - For Lighthouse: `path/to/repo/src/tools/accessibility/lighthouse/run_lighthouse.sh`
 
 That's it! The launcher scripts handle everything else automatically.
 
 ## Usage
 
-Each tool in the package is documented separately. See the `docs/tools/` directory for detailed documentation on individual tools.
+### Quick Start - Axe Core
+1. Install Node.js and npm from [nodejs.org](https://nodejs.org)
+2. Install axe-core CLI: `npm install -g @axe-core/cli`
+3. Set up the Stream Deck button as described above
+4. Press the button while viewing any webpage to run an accessibility audit
 
-### Quick Start
+### Quick Start - Lighthouse
+1. Install Node.js and npm from [nodejs.org](https://nodejs.org)
+2. Install Lighthouse: `npm install -g lighthouse`
+3. Set up the Stream Deck button as described above
+4. Press the button while viewing any webpage to run a comprehensive audit
 
-See individual tool documentation in `docs/tools/` for quick start guides.
+## Tool Selection Guide
 
-## Documentation
+- Use **Axe Core** when you need:
+  - Focused accessibility testing
+  - Detailed WCAG compliance checks
+  - Quick accessibility issue identification
+  - Cross-browser compatibility
 
-- Tool-specific documentation can be found in the `docs/tools/` directory
-- Each tool includes its own README with setup and usage instructions
+- Use **Lighthouse** when you need:
+  - Comprehensive website audits
+  - Performance metrics
+  - SEO analysis
+  - Progressive Web App validation
+  - Best practices review
 
 ## License
 

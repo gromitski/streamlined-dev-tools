@@ -1,22 +1,25 @@
-# Python virtual environment
+# Virtual environment
 venv/
 
-# Python cache files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# macOS system files
-.DS_Store
+# Generated reports and logs
+reports/
+logs/
+lighthouse_reports/
 
 # Environment variables
 .env
 
-# Logs and reports
-logs/
-*.log
-lighthouse_reports/
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Chrome user data
+chrome-user-data/
 
 # IDE settings
 .vscode/
-.idea/ 
+.idea/
+
+# OS files
+.DS_Store 

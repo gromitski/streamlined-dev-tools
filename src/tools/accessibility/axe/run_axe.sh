@@ -21,6 +21,10 @@ done
 
 # Get the directory where the script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_ROOT="$( cd "$SCRIPT_DIR/../../../.." && pwd )"
+
+# Add project root to PYTHONPATH
+export PYTHONPATH="${PROJECT_ROOT}:${PYTHONPATH:-}"
 
 # Define paths
 VENV_PATH="${SCRIPT_DIR}/venv"
@@ -32,7 +36,11 @@ setup_venv() {
     python3 -m venv "${VENV_PATH}"
     # shellcheck source=/dev/null
     . "${VENV_PATH}/bin/activate"
-    "${VENV_PATH}/bin/pip" install --quiet pyperclip rich python-dotenv
+    "${VENV_PATH}/bin/pip" install --quiet pyperclip rich python-dotenv psutil
+    # Install Windows-specific packages if on Windows
+    if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+        "${VENV_PATH}/bin/pip" install --quiet pywin32
+    fi
     echo "Virtual environment setup complete"
 }
 

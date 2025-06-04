@@ -12,10 +12,16 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from dotenv import load_dotenv
-import html  # Add this import for HTML escaping
+import html
+from typing import Optional
 
-# Initialize rich console
+# Initialize rich console first
 console = Console()
+
+# Add the project root to Python path for imports
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "../../../.."))
+sys.path.insert(0, PROJECT_ROOT)
 
 # Try to import tkinter, but have a fallback
 try:
@@ -24,6 +30,140 @@ try:
     HAS_TKINTER = True
 except ImportError:
     HAS_TKINTER = False
+
+def get_active_url_macos() -> Optional[str]:
+    """Get URL from active browser window on macOS."""
+    # Try Chrome first
+    chrome_script = '''
+    tell application "Google Chrome"
+        if frontmost then
+            get URL of active tab of front window
+        end if
+    end tell
+    '''
+    
+    # Try Safari if Chrome fails
+    safari_script = '''
+    tell application "Safari"
+        if frontmost then
+            get URL of current tab of front window
+        end if
+    end tell
+    '''
+    
+    # Try Firefox if Safari fails
+    firefox_script = '''
+    tell application "Firefox"
+        if frontmost then
+            get URL of active tab of front window
+        end if
+    end tell
+    '''
+    
+    for script in [chrome_script, safari_script, firefox_script]:
+        try:
+            result = subprocess.run(
+                ['osascript', '-e', script],
+                capture_output=True,
+                text=True
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                return result.stdout.strip()
+        except subprocess.SubprocessError:
+            continue
+    
+    return None
+
+def get_active_url_windows() -> Optional[str]:
+    """Get URL from active browser window on Windows."""
+    # PowerShell script to get URL from Chrome
+    chrome_script = r'''
+    Add-Type @"
+        using System;
+        using System.Runtime.InteropServices;
+        public class Win32 {
+            [DllImport("user32.dll")]
+            public static extern IntPtr GetForegroundWindow();
+            [DllImport("user32.dll")]
+            public static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder text, int count);
+        }
+"@
+    $window = [Win32]::GetForegroundWindow()
+    $buffer = New-Object System.Text.StringBuilder(512)
+    [Win32]::GetWindowText($window, $buffer, $buffer.Capacity)
+    $title = $buffer.ToString()
+    
+    # Extract URL from common browser title formats
+    # Look for URLs in various browser title formats
+    foreach ($pattern in @(
+        "(?<url>https?://[^ -]+)",  # Basic URL pattern
+        "(?<url>https?://\S+) [-–] ",  # URL followed by dash
+        "[-–] (?<url>https?://\S+)$"  # URL at end after dash
+    )) {
+        if ($title -match $pattern) {
+            return $matches['url']
+        }
+    }
+    '''
+    
+    try:
+        result = subprocess.run(
+            ['powershell', '-Command', chrome_script],
+            capture_output=True,
+            text=True
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+    except subprocess.SubprocessError:
+        pass
+    
+    return None
+
+def get_active_url_linux() -> Optional[str]:
+    """Get URL from active browser window on Linux."""
+    # Try using xdotool to get window title
+    try:
+        # Get active window ID
+        window_id = subprocess.run(
+            ['xdotool', 'getactivewindow'],
+            capture_output=True,
+            text=True
+        ).stdout.strip()
+        
+        # Get window title
+        title = subprocess.run(
+            ['xdotool', 'getwindowname', window_id],
+            capture_output=True,
+            text=True
+        ).stdout.strip()
+        
+        # Extract URL from common browser title formats
+        import re
+        patterns = [
+            r'(?:https?://\S+)',  # Basic URL pattern
+            r'(?:https?://[^ ]+) [-–]',  # URL followed by dash
+            r'[-–] (?:https?://[^ ]+)$'  # URL at end after dash
+        ]
+        
+        for pattern in patterns:
+            url_match = re.search(pattern, title)
+            if url_match:
+                return url_match.group(0).rstrip('- ')
+                
+    except (subprocess.SubprocessError, FileNotFoundError):
+        pass
+    
+    return None
+
+def get_active_browser_url() -> Optional[str]:
+    """Get URL from active browser window based on current platform."""
+    if sys.platform == 'darwin':
+        return get_active_url_macos()
+    elif sys.platform == 'win32':
+        return get_active_url_windows()
+    elif sys.platform.startswith('linux'):
+        return get_active_url_linux()
+    return None
 
 def show_error_dialog(message):
     """Show an error message in a modal dialog or fallback to console."""
@@ -34,83 +174,6 @@ def show_error_dialog(message):
         root.destroy()
     else:
         console.print(Panel(f"[red]Error:[/red] {message}", title="Axe Audit Error", style="red"))
-
-def get_active_url():
-    """Get URL from active browser window based on OS."""
-    system = platform.system().lower()
-    
-    if system == "darwin":  # macOS
-        script = '''
-        tell application "System Events"
-            set frontApp to name of first application process whose frontmost is true
-        end tell
-        
-        if frontApp is "Google Chrome" then
-            tell application "Google Chrome"
-                try
-                    get URL of active tab of front window
-                on error
-                    return ""
-                end try
-            end tell
-        else if frontApp is "Safari" then
-            tell application "Safari"
-                try
-                    get URL of current tab of front window
-                on error
-                    return ""
-                end try
-            end tell
-        else if frontApp is "Firefox" then
-            tell application "Firefox"
-                try
-                    get URL of active tab of front window
-                on error
-                    return ""
-                end try
-            end tell
-        else
-            return ""
-        end if
-        '''
-        try:
-            result = subprocess.run(['osascript', '-e', script], 
-                                  capture_output=True, 
-                                  text=True, 
-                                  stderr=subprocess.DEVNULL)
-            url = result.stdout.strip()
-            return url if url else None
-        except:
-            return None
-            
-    elif system == "windows":
-        try:
-            import win32gui
-            import win32process
-            import psutil
-            
-            window = win32gui.GetForegroundWindow()
-            _, pid = win32process.GetWindowThreadProcessId(window)
-            process = psutil.Process(pid)
-            
-            if any(browser in process.name().lower() for browser in ['chrome', 'firefox', 'iexplore', 'edge']):
-                title = win32gui.GetWindowText(window)
-                if ' - ' in title:
-                    return title.split(' - ')[-1]
-        except:
-            return None
-            
-    elif system == "linux":
-        try:
-            wm_class = subprocess.check_output(['xprop', '-id', '$(xprop -root _NET_ACTIVE_WINDOW | cut -d# -f2)', 'WM_CLASS']).decode()
-            if any(browser in wm_class.lower() for browser in ['chrome', 'firefox', 'chromium']):
-                title = subprocess.check_output(['xprop', '-id', '$(xprop -root _NET_ACTIVE_WINDOW | cut -d# -f2)', '_NET_WM_NAME']).decode()
-                if ' - ' in title:
-                    return title.split(' - ')[-1]
-        except:
-            return None
-    
-    return None
 
 def get_url_from_clipboard():
     """Get URL from clipboard with error handling."""
@@ -610,10 +673,18 @@ def main():
         url = sys.argv[1]
     else:
         # Try browser first
-        url = get_active_url()
+        try:
+            url = get_active_browser_url()
+            if url:
+                console.print(f"[dim]Found URL in active browser: {url}[/dim]")
+        except Exception as e:
+            console.print(f"[dim]Error getting browser URL: {e}[/dim]")
+        
+        # Then try clipboard if browser failed
         if not url:
-            # Then try clipboard
             url = get_url_from_clipboard()
+            if url:
+                console.print(f"[dim]Found URL in clipboard: {url}[/dim]")
     
     if not url or not url.startswith(('http://', 'https://')):
         show_error_dialog(

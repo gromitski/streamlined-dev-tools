@@ -1,9 +1,9 @@
 # Axe Core CLI Audit Tool
 
 A Stream Deck button that runs axe-core CLI accessibility audits on URLs. It can get the URL from:
-1. Active browser window
-2. Clipboard
-3. Command line argument
+1. Active browser window (Chrome, Safari, or Firefox on macOS; Chrome on Windows/Linux)
+2. Clipboard (if no browser window found)
+3. Command line argument (if provided)
 
 ## Quick Start for Stream Deck
 
@@ -23,37 +23,37 @@ The script will automatically:
 - Set up its Python environment
 - Install required dependencies
 - Run the audit
-- Display results in terminal or open HTML report
+- Display results in terminal
+- Open a beautiful HTML report in your browser
 
-## Usage
+## Features
 
-The button will:
-1. Look for a URL in this order:
-   - Active browser window
-   - Clipboard (if no browser window found)
-   - Command line argument (if provided)
-2. Run an axe-core audit
-3. Either:
-   - Display results in terminal (default)
-   - Generate an HTML report in `~/axe_reports/` (optional)
-4. Show error dialogs if any issues occur
+- **Smart URL Detection**: Automatically detects URLs from active browser windows
+- **Beautiful Reports**: Generates clean, modern HTML reports with:
+  - Clear violation summaries
+  - Impact levels and descriptions
+  - Code snippets and fixes
+  - WCAG criteria references
+- **Cross-Platform**: Works on macOS, Windows, and Linux
+- **Error Handling**: Clear error messages and logging
+- **Zero Configuration**: Works out of the box
 
 ## Requirements
 
 - Node.js and npm
 - Python 3.7 or higher
-- Chrome/Chromium browser
+- A modern web browser (Chrome, Safari, or Firefox on macOS; Chrome on Windows/Linux)
 - Stream Deck software
 
 ### System-Specific Requirements
 
 - **macOS**: No additional requirements
-- **Linux**: Install `xclip` for clipboard support:
+- **Linux**: Install `xdotool` for active window detection:
   ```bash
   # Ubuntu/Debian:
-  sudo apt-get install xclip
+  sudo apt-get install xdotool
   # Fedora:
-  sudo dnf install xclip
+  sudo dnf install xdotool
   ```
 - **Windows**: No additional requirements
 
@@ -72,15 +72,9 @@ If you see "axe-core CLI not found":
 ### Other Issues
 - Check the logs in `~/axe_reports/logs/`
 - Make sure Node.js and npm are installed
-- Ensure Chrome/Chromium is installed
+- Ensure you have a supported browser installed
 
 ## Configuration
-
-### Output Format
-Set the environment variable:
-```bash
-AXE_OUTPUT_FORMAT=html  # For HTML reports (default: terminal)
-```
 
 ### Custom Reports Directory
 Set the environment variable:
