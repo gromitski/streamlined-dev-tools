@@ -1,7 +1,7 @@
 # Lighthouse Accessibility Audit Tool
 
 ## Overview
-A Stream Deck-optimized tool that runs Lighthouse audits on web pages using the official Lighthouse CLI. It can take a URL from the command line or automatically grab it from your clipboard, making it perfect for quick accessibility checks while browsing.
+A Stream Deck-optimized tool that runs Lighthouse audits on web pages using the official Lighthouse CLI. It can take a URL from the active browser window, command line, or clipboard, making it perfect for quick accessibility checks while browsing.
 
 ## Requirements
 - Python 3.8 or higher
@@ -14,6 +14,10 @@ A Stream Deck-optimized tool that runs Lighthouse audits on web pages using the 
   ```bash
   npm install -g lighthouse
   ```
+- Platform-specific requirements:
+  - macOS: None (uses built-in AppleScript)
+  - Windows: PowerShell (pre-installed)
+  - Linux: xdotool (`sudo apt-get install xdotool` on Ubuntu/Debian)
 
 ## Installation
 1. Ensure Node.js and npm are installed
@@ -24,6 +28,12 @@ A Stream Deck-optimized tool that runs Lighthouse audits on web pages using the 
 3. Install the Python package and dependencies:
    ```bash
    pip install -r requirements.txt
+   ```
+4. (Linux only) Install xdotool:
+   ```bash
+   sudo apt-get install xdotool  # Ubuntu/Debian
+   sudo dnf install xdotool      # Fedora
+   sudo pacman -S xdotool        # Arch Linux
    ```
 
 ## Stream Deck Setup
@@ -36,8 +46,11 @@ A Stream Deck-optimized tool that runs Lighthouse audits on web pages using the 
 ## Usage
 ### Basic Usage
 1. Navigate to the webpage you want to audit in your browser
-2. Copy the URL (Cmd/Ctrl + L, Cmd/Ctrl + C)
-3. Press the Stream Deck button
+2. Press the Stream Deck button
+3. The script will:
+   1. Try to get the URL from the active browser window
+   2. If that fails, try to get it from your clipboard
+   3. If both fail, show an error message
 4. Wait for the audit to complete
 5. The report will automatically open in your default browser
 
@@ -66,7 +79,11 @@ LIGHTHOUSE_REPORTS_DIR=/path/to/custom/reports/directory
   - SEO
 
 ## Features
-- Automatic URL detection from clipboard
+- URL detection from:
+  1. Active browser window (Chrome, Safari, Firefox)
+  2. Command line arguments
+  3. Clipboard content
+- Cross-platform support (macOS, Windows, Linux)
 - Headless Chrome operation (no visible browser window)
 - Comprehensive HTML reports
 - Local report storage for reference
@@ -78,7 +95,8 @@ LIGHTHOUSE_REPORTS_DIR=/path/to/custom/reports/directory
 Common issues and solutions:
 
 1. **No URL Found**
-   - Ensure you've copied a valid URL to your clipboard
+   - Make sure your browser window is in focus
+   - Try copying the URL to your clipboard
    - Try passing the URL directly as a command line argument
 
 2. **Chrome Not Found**
@@ -89,8 +107,14 @@ Common issues and solutions:
    - Check if the report was generated in the configured reports directory
    - Try opening the report manually from the directory
 
+4. **Active Window Detection Not Working**
+   - macOS: Make sure your browser is allowed in System Settings > Privacy & Security > Automation
+   - Windows: Ensure PowerShell is available
+   - Linux: Check if xdotool is installed (`which xdotool`)
+
 ## Notes
 - Reports are stored locally and can be accessed later
 - The tool uses the official Lighthouse CLI, providing the same results as Chrome DevTools
 - For best results, ensure you have a stable internet connection
-- The script runs Chrome in headless mode to avoid visual disruption 
+- The script runs Chrome in headless mode to avoid visual disruption
+- Browser window detection works with Chrome, Safari, and Firefox on macOS, and most modern browsers on Windows and Linux 

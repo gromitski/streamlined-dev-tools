@@ -18,6 +18,8 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from dotenv import load_dotenv
 
+from .get_active_url import get_active_browser_url
+
 # Load environment variables
 load_dotenv()
 
@@ -85,17 +87,28 @@ def run_lighthouse_audit(url: str) -> Path:
     except Exception as e:
         raise Exception(f"Unexpected error running Lighthouse: {str(e)}") from e
 
+def get_url() -> Optional[str]:
+    """Get URL from command line, active browser window, or clipboard."""
+    # First, check command line arguments
+    if len(sys.argv) > 1:
+        return sys.argv[1]
+    
+    # Then try to get URL from active browser window
+    url = get_active_browser_url()
+    if url:
+        return url
+    
+    # Finally, try clipboard
+    return get_url_from_clipboard()
+
 def main():
     """Main function to run the Lighthouse audit."""
     try:
-        # Check for URL argument or get from clipboard
-        if len(sys.argv) > 1:
-            url = sys.argv[1]
-        else:
-            url = get_url_from_clipboard()
-            if not url:
-                console.print("[red]Error: No URL provided and no valid URL found in clipboard[/red]")
-                sys.exit(1)
+        # Get URL from available sources
+        url = get_url()
+        if not url:
+            console.print("[red]Error: No URL provided, no active browser window found, and no valid URL in clipboard[/red]")
+            sys.exit(1)
         
         # Validate URL
         url = validate_url(url)
