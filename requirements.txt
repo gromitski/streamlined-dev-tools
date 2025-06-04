@@ -15,4 +15,11 @@ black>=22.0.0
 flake8>=6.0.0
 mypy>=1.0.0
 
+# Accessibility Tools
+pyperclip>=1.8.2  # For clipboard operations
+selenium>=4.11.0  # For browser automation
+python-dotenv>=1.0.0  # For environment variables
+requests>=2.31.0  # For HTTP requests
+rich>=13.5.0  # For beautiful terminal output
+
 # Additional dependencies will be added as tools are developed 
