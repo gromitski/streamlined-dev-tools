@@ -1,5 +1,24 @@
 #!/bin/bash
 
+# Source the user's profile to get PATH and other environment variables
+if [ -f "$HOME/.zshrc" ]; then
+    # shellcheck source=/dev/null
+    . "$HOME/.zshrc" >/dev/null 2>&1
+elif [ -f "$HOME/.bash_profile" ]; then
+    # shellcheck source=/dev/null
+    . "$HOME/.bash_profile" >/dev/null 2>&1
+elif [ -f "$HOME/.profile" ]; then
+    # shellcheck source=/dev/null
+    . "$HOME/.profile" >/dev/null 2>&1
+fi
+
+# Add common npm locations to PATH if they exist
+for npm_path in "/usr/local/bin" "/opt/homebrew/bin" "$HOME/.nvm/versions/node/*/bin" "$HOME/.npm-global/bin"; do
+    if [ -d "$npm_path" ]; then
+        PATH="$npm_path:$PATH"
+    fi
+done
+
 # Get the directory where the script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
