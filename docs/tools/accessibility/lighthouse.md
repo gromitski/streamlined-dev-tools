@@ -1,28 +1,29 @@
 # Lighthouse Accessibility Audit Tool
 
 ## Overview
-A Stream Deck-optimized tool that runs Lighthouse audits on web pages. It can take a URL from the command line or automatically grab it from your clipboard, making it perfect for quick accessibility checks while browsing.
+A Stream Deck-optimized tool that runs Lighthouse audits on web pages using the official Lighthouse CLI. It can take a URL from the command line or automatically grab it from your clipboard, making it perfect for quick accessibility checks while browsing.
 
 ## Requirements
 - Python 3.8 or higher
+- Node.js and npm
 - Required Python packages (automatically installed with the package):
   - pyperclip
-  - requests
   - rich
-  - python-dotenv
-- Optional: Google PageSpeed Insights API key for higher quota
+- Lighthouse CLI (installed globally via npm):
+  ```bash
+  npm install -g lighthouse
+  ```
 
 ## Installation
-The tool is automatically installed with the package. However, for optimal performance:
-
-1. (Optional) Get a Google PageSpeed Insights API key:
-   - Visit the [Google Cloud Console](https://console.cloud.google.com/)
-   - Enable the PageSpeed Insights API
-   - Create credentials
-   - Add your API key to `.env` file:
-     ```
-     PAGESPEED_API_KEY=your_api_key_here
-     ```
+1. Ensure Node.js and npm are installed
+2. Install Lighthouse CLI globally:
+   ```bash
+   npm install -g lighthouse
+   ```
+3. Install the Python package and dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ## Stream Deck Setup
 1. Install the "System: Launch Application" action or a Python script launcher plugin
@@ -54,11 +55,13 @@ python lighthouse_audit.py [URL]
   - PWA
   - SEO
 
-## Configuration
-The tool can be configured through environment variables in a `.env` file:
-```env
-PAGESPEED_API_KEY=your_api_key_here  # Optional: for higher API quota
-```
+## Features
+- Automatic URL detection from clipboard
+- Headless Chrome operation (no visible browser window)
+- Comprehensive HTML reports
+- Local report storage for reference
+- Progress indication during audit
+- Error handling with clear messages
 
 ## Troubleshooting
 Common issues and solutions:
@@ -67,9 +70,9 @@ Common issues and solutions:
    - Ensure you've copied a valid URL to your clipboard
    - Try passing the URL directly as a command line argument
 
-2. **API Rate Limit**
-   - Get a PageSpeed Insights API key
-   - Add it to your `.env` file
+2. **Chrome Not Found**
+   - Ensure Chrome is installed on your system
+   - The script uses headless Chrome for auditing
 
 3. **Report Not Opening**
    - Check if the report was generated in `~/lighthouse_reports/`
@@ -77,5 +80,6 @@ Common issues and solutions:
 
 ## Notes
 - Reports are stored locally and can be accessed later
-- The tool uses the PageSpeed Insights API, which provides Lighthouse results without needing Chrome installed
-- For best results, ensure you have a stable internet connection 
+- The tool uses the official Lighthouse CLI, providing the same results as Chrome DevTools
+- For best results, ensure you have a stable internet connection
+- The script runs Chrome in headless mode to avoid visual disruption 
