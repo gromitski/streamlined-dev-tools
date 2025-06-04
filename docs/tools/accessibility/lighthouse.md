@@ -9,6 +9,7 @@ A Stream Deck-optimized tool that runs Lighthouse audits on web pages using the 
 - Required Python packages (automatically installed with the package):
   - pyperclip
   - rich
+  - python-dotenv
 - Lighthouse CLI (installed globally via npm):
   ```bash
   npm install -g lighthouse
@@ -26,7 +27,7 @@ A Stream Deck-optimized tool that runs Lighthouse audits on web pages using the 
    ```
 
 ## Stream Deck Setup
-1. Install the "System: Launch Application" action or a Python script launcher plugin
+1. Install the "System: Open" action or a Python script launcher plugin
 2. Configure the button:
    - Set the script path to the `lighthouse_audit.py` script
    - (Optional) Add an icon representing accessibility testing
@@ -45,8 +46,17 @@ A Stream Deck-optimized tool that runs Lighthouse audits on web pages using the 
 python lighthouse_audit.py [URL]
 ```
 
+### Configuration
+The tool can be configured through environment variables in a `.env` file:
+
+```env
+# Optional: Custom directory for storing reports
+# Default: ~/lighthouse_reports
+LIGHTHOUSE_REPORTS_DIR=/path/to/custom/reports/directory
+```
+
 ### Output
-- Reports are saved in `~/lighthouse_reports/`
+- Reports are saved in `~/lighthouse_reports/` by default (can be customized via `LIGHTHOUSE_REPORTS_DIR`)
 - Filename format: `lighthouse_domain_YYYYMMDD_HHMMSS.html`
 - Reports include scores for:
   - Accessibility
@@ -62,6 +72,7 @@ python lighthouse_audit.py [URL]
 - Local report storage for reference
 - Progress indication during audit
 - Error handling with clear messages
+- Customizable reports directory
 
 ## Troubleshooting
 Common issues and solutions:
@@ -75,7 +86,7 @@ Common issues and solutions:
    - The script uses headless Chrome for auditing
 
 3. **Report Not Opening**
-   - Check if the report was generated in `~/lighthouse_reports/`
+   - Check if the report was generated in the configured reports directory
    - Try opening the report manually from the directory
 
 ## Notes

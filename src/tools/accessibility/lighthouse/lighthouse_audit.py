@@ -16,9 +16,13 @@ from typing import Optional
 import pyperclip
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Constants
-REPORTS_DIR = Path.home() / "lighthouse_reports"
+REPORTS_DIR = Path(os.getenv('LIGHTHOUSE_REPORTS_DIR', str(Path.home() / "lighthouse_reports")))
 console = Console()
 
 def validate_url(url: str) -> str:
