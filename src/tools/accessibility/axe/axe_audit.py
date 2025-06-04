@@ -46,20 +46,39 @@ def get_active_url():
         
         if frontApp is "Google Chrome" then
             tell application "Google Chrome"
-                get URL of active tab of front window
+                try
+                    get URL of active tab of front window
+                on error
+                    return ""
+                end try
             end tell
         else if frontApp is "Safari" then
             tell application "Safari"
-                get URL of current tab of front window
+                try
+                    get URL of current tab of front window
+                on error
+                    return ""
+                end try
             end tell
         else if frontApp is "Firefox" then
             tell application "Firefox"
-                get URL of active tab of front window
+                try
+                    get URL of active tab of front window
+                on error
+                    return ""
+                end try
             end tell
+        else
+            return ""
         end if
         '''
         try:
-            return subprocess.check_output(['osascript', '-e', script]).decode().strip()
+            result = subprocess.run(['osascript', '-e', script], 
+                                  capture_output=True, 
+                                  text=True, 
+                                  stderr=subprocess.DEVNULL)
+            url = result.stdout.strip()
+            return url if url else None
         except:
             return None
             
@@ -90,6 +109,17 @@ def get_active_url():
         except:
             return None
     
+    return None
+
+def get_url_from_clipboard():
+    """Get URL from clipboard with error handling."""
+    try:
+        text = pyperclip.paste()
+        # Basic URL validation
+        if text and any(text.startswith(prefix) for prefix in ['http://', 'https://']):
+            return text
+    except:
+        pass
     return None
 
 def check_axe_cli():
@@ -382,9 +412,11 @@ def main():
     if len(sys.argv) > 1:
         url = sys.argv[1]
     else:
+        # Try browser first
         url = get_active_url()
         if not url:
-            url = pyperclip.paste()
+            # Then try clipboard
+            url = get_url_from_clipboard()
     
     if not url or not url.startswith(('http://', 'https://')):
         show_error_dialog(
