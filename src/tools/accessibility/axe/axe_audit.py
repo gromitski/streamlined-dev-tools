@@ -12,6 +12,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from dotenv import load_dotenv
+import html  # Add this import for HTML escaping
 
 # Initialize rich console
 console = Console()
@@ -123,18 +124,38 @@ def get_url_from_clipboard():
     return None
 
 def check_axe_cli():
-    """Check if axe-core CLI is installed."""
+    """Check if axe-core CLI is installed and working."""
     try:
-        subprocess.run(['axe', '--version'], capture_output=True, text=True)
+        # Try to get version info
+        result = subprocess.run(['axe', '--version'], capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            error_msg = (
+                "axe-core CLI is installed but not working properly.\n"
+                "Try reinstalling it with: npm install -g @axe-core/cli"
+            )
+            if result.stderr:
+                error_msg += f"\nError: {result.stderr}"
+            show_error_dialog(error_msg)
+            return False
+            
         return True
+        
     except FileNotFoundError:
         show_error_dialog(
             "axe-core CLI not found!\n\n"
             "Please install it first:\n"
             "1. Visit https://nodejs.org\n"
             "2. Download and install Node.js\n"
-            "3. Restart your computer\n"
-            "4. Open Terminal and run: npm install -g @axe-core/cli"
+            "3. Open Terminal and run: npm install -g @axe-core/cli\n"
+            "4. Restart your terminal/IDE"
+        )
+        return False
+    except Exception as e:
+        show_error_dialog(
+            f"Error checking axe-core CLI: {str(e)}\n\n"
+            "Please make sure it's installed correctly:\n"
+            "npm install -g @axe-core/cli"
         )
         return False
 
@@ -158,128 +179,272 @@ def generate_html_report(results, report_file):
     incomplete = results.get('incomplete', [])
     passes = results.get('passes', [])
     
-    html = f"""<!DOCTYPE html>
+    report_html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axe Accessibility Audit Report</title>
+    <title>Accessibility Audit Report</title>
     <style>
+        :root {{
+            --color-text: #2c3e50;
+            --color-background: #f5f5f5;
+            --color-white: #ffffff;
+            --color-border: #e9ecef;
+            --color-link: #0066cc;
+            
+            --color-critical: #dc3545;
+            --color-serious: #fd7e14;
+            --color-moderate: #ffc107;
+            --color-minor: #17a2b8;
+            
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 1px 3px rgba(0,0,0,0.1);
+            
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+        }}
+        
         body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             line-height: 1.6;
+            margin: 0;
+            padding: var(--space-lg);
+            background: var(--color-background);
+            color: var(--color-text);
+        }}
+        
+        .container {{
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
-            background: #f5f5f5;
+            background: var(--color-white);
+            padding: var(--space-xl);
+            border-radius: var(--space-sm);
+            box-shadow: var(--shadow-md);
         }}
-        .container {{
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }}
+        
         h1 {{
-            color: #2c3e50;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin: 0 0 var(--space-xl) 0;
+            padding-bottom: var(--space-md);
+            border-bottom: 2px solid var(--color-border);
+            color: var(--color-text);
         }}
+        
+        h2 {{
+            font-size: 20px;
+            font-weight: 600;
+            margin: var(--space-xl) 0 var(--space-lg) 0;
+            padding-bottom: var(--space-sm);
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text);
+        }}
+        
         .summary {{
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-lg);
+            margin: var(--space-xl) 0;
         }}
+        
         .summary-item {{
-            padding: 15px;
-            border-radius: 6px;
+            padding: var(--space-lg);
+            border-radius: var(--space-sm);
             text-align: center;
         }}
-        .passes {{ background: #d4edda; color: #155724; }}
-        .incomplete {{ background: #fff3cd; color: #856404; }}
-        .violations {{ background: #f8d7da; color: #721c24; }}
-        .issue-section {{
-            margin: 30px 0;
-            padding: 20px;
-            border-radius: 6px;
-            background: white;
+        
+        .summary-label {{
+            font-size: 16px;
+            font-weight: 500;
         }}
+        
+        .summary-count {{
+            font-size: 32px;
+            font-weight: 600;
+            margin: var(--space-sm) 0;
+        }}
+        
+        .passes {{ 
+            background: #e8f5e9;
+            color: #1b5e20;
+        }}
+        
+        .incomplete {{ 
+            background: #fff3e0;
+            color: #e65100;
+        }}
+        
+        .violations {{ 
+            background: #ffebee;
+            color: #b71c1c;
+        }}
+        
         .issue {{
-            border: 1px solid #ddd;
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 4px;
+            margin: var(--space-lg) 0;
+            padding: var(--space-lg);
+            border-radius: var(--space-sm);
+            background: var(--color-white);
+            border: 1px solid var(--color-border);
         }}
-        .impact-critical {{ border-left: 5px solid #dc3545; }}
-        .impact-serious {{ border-left: 5px solid #fd7e14; }}
-        .impact-moderate {{ border-left: 5px solid #ffc107; }}
-        .impact-minor {{ border-left: 5px solid #17a2b8; }}
-        .tag {{
+        
+        .issue-header {{
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+        }}
+        
+        .impact {{
             display: inline-block;
-            padding: 2px 8px;
-            margin: 2px;
-            background: #e9ecef;
-            border-radius: 12px;
-            font-size: 0.9em;
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--space-xs);
+            font-weight: 500;
+            font-size: 14px;
+            min-width: 80px;
+            text-align: center;
+            color: var(--color-white);
+        }}
+        
+        .impact-critical {{ background: var(--color-critical); }}
+        .impact-serious {{ background: var(--color-serious); }}
+        .impact-moderate {{ background: var(--color-moderate); color: #000; }}
+        .impact-minor {{ background: var(--color-minor); }}
+        
+        .issue-title {{
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--color-text);
+            flex: 1;
+        }}
+        
+        .help-link {{
+            display: inline-block;
+            margin-bottom: var(--space-lg);
+            color: var(--color-link);
+            text-decoration: none;
+            font-size: 14px;
+        }}
+        
+        .help-link:hover {{
+            text-decoration: underline;
+        }}
+        
+        .element {{
+            margin: var(--space-md) 0;
+            padding: var(--space-md);
+            background: #f8f9fa;
+            border-radius: var(--space-xs);
+            border: 1px solid var(--color-border);
+        }}
+        
+        .element-html {{
+            font-family: Monaco, monospace;
+            font-size: 13px;
+            padding: var(--space-sm);
+            background: var(--color-white);
+            border-radius: var(--space-xs);
+            border: 1px solid var(--color-border);
+            overflow-x: auto;
+            margin: var(--space-sm) 0;
+        }}
+        
+        .element-summary {{
+            margin-top: var(--space-sm);
+            color: #666;
+            font-size: 14px;
+        }}
+        
+        @media (max-width: 768px) {{
+            .summary {{
+                grid-template-columns: 1fr;
+            }}
+            
+            .container {{
+                padding: var(--space-lg);
+            }}
+            
+            .issue {{
+                padding: var(--space-md);
+            }}
         }}
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Axe Accessibility Audit Report</h1>
+        <h1>Accessibility Audit Report</h1>
+        
         <div class="summary">
-            <div class="summary-item passes">
-                <h2>✅ Passed</h2>
-                <p>{len(passes)} checks</p>
+            <div class="summary-item violations">
+                <div class="summary-label">Violations</div>
+                <div class="summary-count">{len(violations)}</div>
             </div>
             <div class="summary-item incomplete">
-                <h2>⚠️ Needs Review</h2>
-                <p>{len(incomplete)} checks</p>
+                <div class="summary-label">Needs Review</div>
+                <div class="summary-count">{len(incomplete)}</div>
             </div>
-            <div class="summary-item violations">
-                <h2>❌ Violations</h2>
-                <p>{len(violations)} checks</p>
+            <div class="summary-item passes">
+                <div class="summary-label">Passed</div>
+                <div class="summary-count">{len(passes)}</div>
             </div>
         </div>
 """
     
     if violations:
-        html += """
-        <div class="issue-section">
-            <h2>Violations</h2>
+        report_html += """
+        <h2>Violations</h2>
 """
         for violation in violations:
             impact = violation.get('impact', 'unknown')
-            html += f"""
-            <div class="issue impact-{impact}">
-                <h3>{violation.get('help', violation.get('description', 'No description'))}</h3>
-                <p><strong>Impact:</strong> {impact}</p>
-                <p>{violation.get('helpUrl', '')}</p>
-                <div class="tags">
-                    {''.join(f'<span class="tag">{tag}</span>' for tag in violation.get('tags', []))}
+            report_html += f"""
+            <div class="issue">
+                <div class="issue-header">
+                    <span class="impact impact-{impact}">{impact.title()}</span>
+                    <div class="issue-title">{html.escape(violation.get('help', violation.get('description', 'No description')))}</div>
                 </div>
+                <a href="{violation.get('helpUrl', '#')}" class="help-link" target="_blank">Learn more about this issue</a>
+"""
+            for node in violation.get('nodes', []):
+                report_html += f"""
+                <div class="element">
+                    <div class="element-html">{html.escape(node.get('html', 'No HTML available'))}</div>
+                    <div class="element-summary">{html.escape(node.get('failureSummary', ''))}</div>
+                </div>
+"""
+            report_html += """
             </div>
 """
     
     if incomplete:
-        html += """
-        <div class="issue-section">
-            <h2>Needs Review</h2>
+        report_html += """
+        <h2>Needs Review</h2>
 """
         for item in incomplete:
             impact = item.get('impact', 'unknown')
-            html += f"""
-            <div class="issue impact-{impact}">
-                <h3>{item.get('help', item.get('description', 'No description'))}</h3>
-                <p><strong>Impact:</strong> {impact}</p>
-                <p>{item.get('helpUrl', '')}</p>
-                <div class="tags">
-                    {''.join(f'<span class="tag">{tag}</span>' for tag in item.get('tags', []))}
+            report_html += f"""
+            <div class="issue">
+                <div class="issue-header">
+                    <span class="impact impact-{impact}">{impact.title()}</span>
+                    <div class="issue-title">{html.escape(item.get('help', item.get('description', 'No description')))}</div>
                 </div>
+                <a href="{item.get('helpUrl', '#')}" class="help-link" target="_blank">Learn more about this issue</a>
+"""
+            for node in item.get('nodes', []):
+                report_html += f"""
+                <div class="element">
+                    <div class="element-html">{html.escape(node.get('html', 'No HTML available'))}</div>
+                    <div class="element-summary">{html.escape(node.get('failureSummary', ''))}</div>
+                </div>
+"""
+            report_html += """
             </div>
 """
     
-    html += """
+    report_html += """
         </div>
     </div>
 </body>
@@ -287,16 +452,15 @@ def generate_html_report(results, report_file):
 """
     
     with open(report_file, 'w') as f:
-        f.write(html)
+        f.write(report_html)
 
 def run_axe_audit(url, reports_dir, logs_dir):
     """Run the axe-core audit on the specified URL."""
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     domain = url.split('/')[2] if '://' in url else url.split('/')[0]
-    output_format = os.getenv('AXE_OUTPUT_FORMAT', 'terminal').lower()
     
-    # Always get JSON output for processing
-    cmd = ['axe', url, '--stdout', '--no-reporter']
+    # Simplified command - just get the core results
+    cmd = ['axe', url, '--stdout']
     
     # Set up logging
     log_file = os.path.join(logs_dir, f'axe_audit_{timestamp}.log')
@@ -305,41 +469,74 @@ def run_axe_audit(url, reports_dir, logs_dir):
         log.write(f'Command: {" ".join(cmd)}\n\n')
         
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            log.write(result.stdout)
-            log.write(result.stderr)
+            # Add timeout to prevent hanging
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=30  # 30 second timeout
+            )
+            
+            # Log both stdout and stderr
+            if result.stdout:
+                log.write("STDOUT:\n")
+                log.write(result.stdout)
+                log.write("\n")
+            
+            if result.stderr:
+                log.write("STDERR:\n")
+                log.write(result.stderr)
+                log.write("\n")
             
             if result.returncode != 0:
-                show_error_dialog(f"Error running axe-core audit.\nCheck the log file: {log_file}")
+                error_msg = f"axe-core CLI failed with return code {result.returncode}.\n"
+                if result.stderr:
+                    error_msg += f"Error: {result.stderr}\n"
+                log.write(f"ERROR: {error_msg}")
+                show_error_dialog(f"Error running axe-core audit:\n{error_msg}\nCheck the log file: {log_file}")
                 return False
             
             try:
                 results = json.loads(result.stdout)
                 
-                if output_format == 'html':
-                    # Generate and open HTML report
-                    report_file = os.path.join(reports_dir, f'axe_{domain}_{timestamp}.html')
-                    generate_html_report(results, report_file)
-                    
-                    if platform.system() == 'Darwin':
-                        subprocess.run(['open', report_file])
-                    elif platform.system() == 'Windows':
-                        os.startfile(report_file)
-                    else:
-                        subprocess.run(['xdg-open', report_file])
+                # Always generate HTML report
+                report_file = os.path.join(reports_dir, f'axe_{domain}_{timestamp}.html')
+                generate_html_report(results, report_file)
+                
+                # Display results in terminal
+                display_terminal_results(results)
+                
+                # Open HTML report in browser
+                console.print(f"\nOpening HTML report: {report_file}")
+                if platform.system() == 'Darwin':
+                    subprocess.run(['open', report_file])
+                elif platform.system() == 'Windows':
+                    os.startfile(report_file)
                 else:
-                    # Display results in terminal
-                    display_terminal_results(results)
+                    subprocess.run(['xdg-open', report_file])
                 
                 return True
                 
-            except json.JSONDecodeError:
-                console.print(result.stdout)
-                return True
+            except json.JSONDecodeError as e:
+                log.write(f"JSON Parse Error: {str(e)}\n")
+                log.write(f"Raw output:\n{result.stdout}\n")
+                show_error_dialog(
+                    f"Failed to parse axe-core results.\n"
+                    f"JSON Error: {str(e)}\n"
+                    f"Check the log file: {log_file}"
+                )
+                return False
+            
+        except subprocess.TimeoutExpired:
+            error_msg = "axe-core audit timed out after 30 seconds"
+            log.write(f"ERROR: {error_msg}\n")
+            show_error_dialog(f"{error_msg}\nCheck the log file: {log_file}")
+            return False
             
         except Exception as e:
-            log.write(f'Error: {str(e)}\n')
-            show_error_dialog(f"Error running axe-core audit.\nCheck the log file: {log_file}")
+            error_msg = f"Unexpected error: {str(e)}"
+            log.write(f"ERROR: {error_msg}\n")
+            show_error_dialog(f"{error_msg}\nCheck the log file: {log_file}")
             return False
 
 def display_terminal_results(results):
