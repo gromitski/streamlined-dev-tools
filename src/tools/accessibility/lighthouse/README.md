@@ -14,16 +14,16 @@ A Stream Deck button that runs Lighthouse accessibility audits on URLs. It can g
    npm install -g lighthouse
    ```
 4. In Stream Deck:
-   - Add a new "System: Open" action
-   - Set the following path as the command:
-     ```bash
-     /path/to/repo/src/tools/accessibility/lighthouse/run_lighthouse.sh
-     ```
-   - The script will automatically:
-     * Set up its Python environment
-     * Install required dependencies
-     * Run the audit
-     * Open the report in your browser
+   - Create a new button
+   - Choose "System: Open" action
+   - Set the path to: `/path/to/repo/src/tools/accessibility/lighthouse/run_lighthouse.sh`
+   - That's it! The script handles everything else automatically
+
+The script will automatically:
+- Set up its Python environment
+- Install required dependencies
+- Run the audit
+- Open the report in your browser
 
 ## Usage
 
@@ -36,7 +36,7 @@ The button will:
 3. Generate an HTML report in `~/lighthouse_reports/`
 4. Open the report in your default browser
 
-If no URL is found, a dialog will appear with instructions.
+If no URL is found or there's an error, a dialog will appear with instructions.
 
 ## Requirements
 

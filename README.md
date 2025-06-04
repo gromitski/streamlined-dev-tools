@@ -1,6 +1,6 @@
 # Streamlined Dev Tools
 
-A collection of development-related Python scripts designed for use with Stream Decks and other productivity tools.
+A collection of development-related tools designed for use with Stream Decks and other productivity tools.
 
 ## Overview
 
@@ -11,83 +11,48 @@ This repository contains various utility scripts and tools to enhance developer 
 ```
 streamlined-dev-tools/
 ├── src/
-│   ├── tools/         # Individual tool implementations
-│   └── __init__.py    # Package initialization
+│   └── tools/         # Individual tool implementations
 ├── docs/
-│   ├── tools/         # Individual tool documentation
-│   └── README.md      # Documentation guidelines
-├── tests/
-│   └── tools/         # Tool-specific tests
-├── examples/          # Example scripts and configurations
-├── scripts/          # Setup and utility scripts
-├── pyproject.toml     # Project configuration
+│   └── tools/         # Individual tool documentation
+├── tests/             # Tool-specific tests
 └── README.md         # This file
 ```
 
 ## Features
 
-The package includes (or will include) various tools for:
+The package includes tools for:
 
-- Stream Deck Integration
-- Development Workflow Automation
-- Project Management
-- System Monitoring
-- Custom Utility Scripts
-
-### Available Tools
-
-#### Accessibility
+### Accessibility
 - **Lighthouse Audit**: Run accessibility audits on web pages directly from your Stream Deck
-
-(More tools will be listed here as they are developed)
+  - Gets URLs from active browser windows or clipboard
+  - Generates comprehensive HTML reports
+  - Shows results through modal dialogs
+  - Handles all dependencies automatically
 
 ## Requirements
 
-- Python 3.8 or higher
-- Additional requirements will be listed in requirements.txt
+- Python 3.7 or higher
+- Additional requirements are listed in each tool's documentation
 
 ## Installation
 
-### For Development
-
 1. Clone the repository:
 ```bash
 git clone https://github.com/gromitski/streamlined-dev-tools.git
 cd streamlined-dev-tools
 ```
 
-2. Install dependencies in a virtual environment:
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-### For Stream Deck Usage
-
-To use the tools directly with Stream Deck buttons (recommended):
-
-1. Clone the repository:
-```bash
-git clone https://github.com/gromitski/streamlined-dev-tools.git
-cd streamlined-dev-tools
-```
-
-2. Run the global setup script:
-```bash
-./scripts/setup_global.sh
-```
-
-This will install all necessary dependencies globally, making the tools ready to use with Stream Deck buttons.
+2. Follow the setup instructions in each tool's README file for specific requirements and configuration.
 
 ## Stream Deck Setup
 
-1. Create a new button in Stream Deck
-2. Choose 'System: Open' action
-3. Set the path to the script you want to run (e.g., `path/to/streamlined-dev-tools/src/tools/accessibility/lighthouse/lighthouse_audit.py`)
-4. Set 'Open with' to: python3
+Each tool comes with its own launcher script that handles all dependencies and environment setup. To use a tool:
 
-Each tool's documentation includes specific Stream Deck setup instructions.
+1. Create a new button in Stream Deck
+2. Choose "System: Open" action
+3. Set the path to the tool's launcher script (e.g., `path/to/repo/src/tools/accessibility/lighthouse/run_lighthouse.sh`)
+
+That's it! The launcher scripts handle everything else automatically.
 
 ## Usage
 
@@ -100,8 +65,7 @@ See individual tool documentation in `docs/tools/` for quick start guides.
 ## Documentation
 
 - Tool-specific documentation can be found in the `docs/tools/` directory
-- Example usage can be found in the `examples/` directory
-- For contribution guidelines, see `docs/README.md`
+- Each tool includes its own README with setup and usage instructions
 
 ## License
 
@@ -115,5 +79,5 @@ When contributing:
 1. Create a new branch for your feature
 2. Follow the existing code style
 3. Add tests for any new functionality
-4. Update documentation following the templates in `docs/README.md`
+4. Update documentation as needed
 5. Submit a pull request with a clear description of your changes 
