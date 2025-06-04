@@ -14,6 +14,7 @@ streamlined-dev-tools/
 │   └── tools/         # Individual tool implementations
 │       └── accessibility/
 │           ├── axe/   # Axe Core accessibility audit tool
+│           ├── html_validator/ # HTML validation tool
 │           └── lighthouse/ # Lighthouse audit tool
 └── README.md         # This file
 ```
@@ -29,6 +30,13 @@ The package includes tools for:
   - Shows results through terminal and browser
   - Focuses specifically on accessibility issues
   - Supports macOS, Windows, and Linux
+
+- **HTML Validator**: Standards-compliant HTML validation
+  - Validates web pages against HTML standards
+  - Automatically grabs URLs from Chrome or clipboard
+  - Simple, focused validation reports
+  - Perfect for quick HTML compliance checks
+  - Optimized for macOS, with cross-platform support
 
 - **Lighthouse Audit**: Comprehensive web page auditing
   - Analyzes accessibility, performance, SEO, and best practices
@@ -79,6 +87,12 @@ That's it! The launcher scripts handle everything else automatically.
 3. Set up the Stream Deck button as described above
 4. Press the button while viewing any webpage to run a comprehensive audit
 
+### Quick Start - HTML Validator
+1. Navigate to the validator directory
+2. Run the validator script: `./run_validator.sh`
+3. The tool will automatically grab the URL from your active Chrome window or clipboard
+4. View the validation results
+
 ## Tool Selection Guide
 
 - Use **Axe Core** when you need:
@@ -86,6 +100,12 @@ That's it! The launcher scripts handle everything else automatically.
   - Detailed WCAG compliance checks
   - Quick accessibility issue identification
   - Cross-browser compatibility
+
+- Use **HTML Validator** when you need:
+  - Quick HTML standards compliance checks
+  - Simple, focused validation reports
+  - Automatic URL collection from browser/clipboard
+  - Minimal setup and dependencies
 
 - Use **Lighthouse** when you need:
   - Comprehensive website audits
@@ -100,11 +120,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. 
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 When contributing:
 1. Create a new branch for your feature
 2. Follow the existing code style
 3. Add tests for any new functionality
 4. Update documentation as needed
-5. Submit a pull request with a clear description of your changes 
+5. Submit a pull request with a clear description of your changes
